@@ -147,6 +147,37 @@ function loanOffer(data) {
   });
 }
 
+function getIndex(res) {
+  let body = render(LOAN_FORM_TEMPLATE, {apr: APR});
+
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "text/html; charset=UTF-8");
+  res.write(`${body}\n`);
+  res.end();
+}
+
+function getLoanOffer(res, path) {
+  let loanData = loanOffer(getQueryData(path));
+  let body = render(LOAN_OFFER_TEMPLATE, loanData);
+
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "text/html; charset=UTF-8");
+  res.write(`${body}\n`);
+  res.end();
+}
+
+function postLoanOffer(req, res) {
+  parseFormData(req, parsedData => {
+    let loanData = loanOffer(parsedData);
+    let body = render(LOAN_OFFER_TEMPLATE, loanData);
+
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/html');
+    res.write(`${body}\n`);
+    res.end();
+  });
+}
+
 const SERVER = HTTP.createServer((req, res) => {
   let method = req.method;
   let path = req.url;
@@ -161,33 +192,11 @@ const SERVER = HTTP.createServer((req, res) => {
       res.end();
 
     } else if (method === "GET" && pathname === "/") {
-      let body = render(LOAN_FORM_TEMPLATE, {apr: APR});
-
-      res.statusCode = 200;
-      res.setHeader("Content-Type", "text/html; charset=UTF-8");
-      res.write(`${body}\n`);
-      res.end();
-
+      getIndex(res);
     } else if (method === "GET" && pathname === "/loan-offer") {
-      let loanData = loanOffer(getQueryData(path));
-      let body = render(LOAN_OFFER_TEMPLATE, loanData);
-
-      res.statusCode = 200;
-      res.setHeader("Content-Type", "text/html; charset=UTF-8");
-      res.write(`${body}\n`);
-      res.end();
-
+      getLoanOffer(res, path);
     } else if (method === "POST" && pathname === "/loan-offer") {
-      parseFormData(req, parsedData => {
-        let loanData = loanOffer(parsedData);
-        let body = render(LOAN_OFFER_TEMPLATE, loanData);
-
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/html');
-        res.write(`${body}\n`);
-        res.end();
-      });
-
+      postLoanOffer(req, res);
     } else {
       res.statusCode = 404;
       res.end();
