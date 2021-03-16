@@ -43,37 +43,24 @@ app.get("/", (req, res) => {
   res.redirect("/english");
 });
 
-app.get("/:language", (req, res) => {
-  res.render(`hello-world-${req.params.language}`, {
-    currentPath: req.path,
-    language: LANGUAGE_CODES[req.params.language],
-    countries: COUNTRY_DATA
-  });
+app.get("/:language", (req, res, next) => {
+  const language = req.params.language;
+  const langCode = LANGUAGE_CODES[language];
+  if (!langCode) {
+    next(new Error(`Language not supported: ${language}`));
+  } else {
+    res.render(`hello-world-${language}`, {
+      currentPath: req.path,
+      language: langCode,
+      countries: COUNTRY_DATA
+    });
+  }
 });
 
-// app.get("/english", (req, res) => {
-//   res.render("hello-world-english", {
-//     currentPath: req.path,
-//     language: "en-US",
-//     countries: COUNTRY_DATA
-//   });
-// });
-
-// app.get("/french", (req, res) => {
-//   res.render("hello-world-french", {
-//     currentPath: req.path,
-//     language: "fr-FR",
-//     countries: COUNTRY_DATA
-//   });
-// });
-
-// app.get("/serbian", (req, res) => {
-//   res.render("hello-world-serbian", {
-//     currentPath: req.path,
-//     language: "sr-Cyrl-rs",
-//     countries: COUNTRY_DATA
-//   });
-// });
+app.use((err, req, res, _next) => {
+  console.log(err);
+  res.status(404).send(err.message);
+});
 
 app.listen(3000, "localhost", () => {
   console.log("Listening to port 3000...");
