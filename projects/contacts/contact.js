@@ -67,27 +67,61 @@ app.get("/contacts/new", (req, res) => {
 
 app.post("/contacts/new",
   (req, res, next) => {
+    for (param in req.body) {
+      req.body[param] = req.body[param].trim();
+    }
+    next();
+  },
+
+  (req, res, next) => {
     res.locals.errorMessages = [];
     next();
   },
 
   (req, res, next) => {
-    if (req.body.firstName.length === 0) {
+    let firstName = req.body.firstName;
+    if (firstName.length === 0) {
       res.locals.errorMessages.push("First name is required.");
     }
-    next();
-  },
-
-  (req, res, next) => {
-    if (req.body.lastName.length === 0) {
-      res.locals.errorMessages.push("Last name is required.");
+    if (!firstName.match(/^[A-Za-z\s]+$/)) {
+      res.locals.errorMessages.push("Only alphabetic characters and space are allowed for names.");
+    }
+    if (firstName.length > 25) {
+      res.locals.errorMessages.push("First name cannot be longer than 25 characters");
     }
     next();
   },
 
   (req, res, next) => {
-    if (req.body.phoneNumber.length === 0) {
+    let lastName = req.body.lastName;
+    if (lastName.length === 0) {
+      res.locals.errorMessages.push("Last name is required.");
+    }
+    if (!lastName.match(/^[A-Za-z\s]+$/)) {
+      res.locals.errorMessages.push("Only alphabetic characters and space are allowed for names.");
+    }
+    if (lastName.length > 25) {
+      res.locals.errorMessages.push("Last name cannot be longer than 25 characters.");
+    }
+    next();
+  },
+
+  (req, res, next) => {
+    contactData.forEach(contact => {
+      if ((contact.firstName === req.body.firstName) && (contact.lastName === req.body.lastName)) {
+        res.locals.errorMessages.push(`${contact.firstName} ${contact.lastName} already exists.`)
+      }
+    });
+    next();
+  },
+
+  (req, res, next) => {
+    let phoneNumber = req.body.phoneNumber;
+    if (phoneNumber.length === 0) {
       res.locals.errorMessages.push("Phone number is required.");
+    }
+    if (!phoneNumber.match(/\d{3}-\d{3}-\d{4}/)) {
+      res.locals.errorMessages.push("Phone number must have US standard format ###-###-####.");
     }
     next();
   },
