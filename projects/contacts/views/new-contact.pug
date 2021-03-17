@@ -10,20 +10,23 @@ block content
           dd
             input(type="text"
                   id="firstName"
-                  name="firstName")
+                  name="firstName"
+                  value=firstName)
           dt 
             label(for="lastName") Last Name:
           dd 
             input(type="text"
                   id="lastName"
-                  name="lastName")
+                  name="lastName"
+                  value=lastName)
           dt 
             label(for="phoneNumber") Phone Number:
           dd
             input(type="text"
                   id="phoneNumber" 
                   name="phoneNumber" 
-                  placeholder="###-###-####")
+                  placeholder="###-###-####"
+                  value=phoneNumber)
       fieldset
         input(type="submit" value="Save") 
         //- button.cancel(formaction="/contacts" formmethod="get") Cancel

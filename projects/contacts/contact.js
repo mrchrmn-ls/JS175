@@ -130,6 +130,9 @@ app.post("/contacts/new",
     if (res.locals.errorMessages.length > 0) {
       res.render("new-contact", {
         errorMessages: res.locals.errorMessages,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        phoneNumber: req.body.phoneNumber
       });
     } else {
       next();
