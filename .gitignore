@@ -4,3 +4,4 @@ package-lock.json
 /*/package-lock.json
 /projects/*/node_modules/*
 /projects/*/package-lock.json
+/projects/*/session-store.db
