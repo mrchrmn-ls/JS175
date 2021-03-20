@@ -5,3 +5,4 @@ package-lock.json
 /projects/*/node_modules/*
 /projects/*/package-lock.json
 /projects/*/session-store.db
+/projects/todos-final
