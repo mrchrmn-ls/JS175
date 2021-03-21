@@ -1,6 +1,9 @@
 /* eslint-disable max-lines-per-function */
 const express = require("express");
 const morgan = require("morgan");
+const flash = require("express-flash");
+const session = require("express-session");
+
 const TodoList = require("./lib/todolist");
 
 const app = express();
@@ -18,6 +21,20 @@ app.set("views", "./views");
 app.use(morgan("common"));
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
+app.use(session({
+  name: "launch-school-todos-session-id",
+  resave: false,
+  saveUninitialized: true,
+  secret: "This really isn't secure at all"
+}));
+
+app.use(flash());
+app.use((req, res, next) => {
+  res.locals.flash = req.session.flash;
+  delete req.session.flash;
+  next();
+});
+
 
 // return copy of lists array sorted by list titles
 function sortTodoLists(lists) {
@@ -51,22 +68,27 @@ app.get("/lists/new", (req, res) => {
 
 app.post("/lists", (req, res) => {
   let title = req.body.todoListTitle.trim();
+
   if (title.length === 0) {
+    req.flash("error", "You need to provide a title.");
     res.render("new-list", {
-      errorMessage: "You need to provide a title."
+      flash: req.flash()
     });
   } else if (title.length > 100) {
+    req.flash("error", "Title must be shorter than 100 characters.");
     res.render("new-list", {
-      errorMessage: "Title must be shorter than 100 characters.",
+      flash: req.flash(),
       todoListTitle: title
     });
   } else if (todoLists.some(list => list.getTitle() === title)) {
+    req.flash("error", "A list with this title already exists.");
     res.render("new-list", {
-      errorMessage: "A list with this title already exists.",
+      flash: req.flash(),
       todoListTitle: title
     });
   } else {
     todoLists.push(new TodoList(title));
+    req.flash("success", "The new todo list has been added.");
     res.redirect("/lists");
   }
 });
