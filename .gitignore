@@ -6,3 +6,4 @@ package-lock.json
 /projects/*/package-lock.json
 /projects/*/session-store.db
 /projects/todos-final
+/.vscode

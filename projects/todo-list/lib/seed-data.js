@@ -7,7 +7,6 @@ todoList1.add(new Todo("Chat with co-workers"));
 todoList1.add(new Todo("Duck out of meeting"));
 todoList1.markDone("Get coffee");
 todoList1.markDone("Chat with co-workers");
-console.log(todoList1);
 
 let todoList2 = new TodoList("Home Todos");
 todoList2.add(new Todo("Feed the cats"));
