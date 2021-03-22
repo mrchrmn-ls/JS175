@@ -3,6 +3,7 @@ const express = require("express");
 const morgan = require("morgan");
 const flash = require("express-flash");
 const session = require("express-session");
+const { body, validationResult } = require("express-validator");
 
 const TodoList = require("./lib/todolist");
 
@@ -66,32 +67,34 @@ app.get("/lists/new", (req, res) => {
   res.render("new-list");
 });
 
-app.post("/lists", (req, res) => {
-  let title = req.body.todoListTitle.trim();
+app.post("/lists",
+  [
+    body("todoListTitle")
+      .trim()
+      .isLength({ min: 1})
+      .withMessage("You need to provide a title.")
+      .isLength({ max: 100})
+      .withMessage("Title must be shorter than 100 characters.")
+      .custom(title => !todoLists.some(list => list.getTitle() === title))
+      .withMessage("A list with this title already exists.")
+  ],
+  (req, res) => {
+    let title = req.body.todoListTitle;
+    let errors = validationResult(req);
 
-  if (title.length === 0) {
-    req.flash("error", "You need to provide a title.");
-    res.render("new-list", {
-      flash: req.flash()
-    });
-  } else if (title.length > 100) {
-    req.flash("error", "Title must be shorter than 100 characters.");
-    res.render("new-list", {
-      flash: req.flash(),
-      todoListTitle: title
-    });
-  } else if (todoLists.some(list => list.getTitle() === title)) {
-    req.flash("error", "A list with this title already exists.");
-    res.render("new-list", {
-      flash: req.flash(),
-      todoListTitle: title
-    });
-  } else {
-    todoLists.push(new TodoList(title));
-    req.flash("success", "The new todo list has been added.");
-    res.redirect("/lists");
+    if (!errors.isEmpty()) {
+      errors.array().forEach(message => req.flash("error", message.msg));
+      res.render("new-list", {
+        flash: req.flash(),
+        todoListTitle: title
+      });
+    } else {
+      todoLists.push(new TodoList(title));
+      req.flash("success", "The new todo list has been added.");
+      res.redirect("/lists");
+    }
   }
-});
+);
 
 // Listener
 app.listen(PORT, HOST, () => {
