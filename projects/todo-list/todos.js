@@ -95,7 +95,7 @@ app.post("/lists",
   }
 );
 
-app.use((err, req, res, _next) => {
+app.use((err, _req, res, _next) => {
   console.log(err);
   res.status(404)
      .send(err.message);
