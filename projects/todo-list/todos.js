@@ -6,15 +6,15 @@ const session = require("express-session");
 const { body, validationResult } = require("express-validator");
 
 const TodoList = require("./lib/todolist");
+// const Todo = require("./lib/todo");
 const { sortByTitleAndStatus } = require("./lib/sort");
 
 const app = express();
 const HOST = "localhost";
 const PORT = 3000;
 
-//static data for initial testing
+// static data for initial testing
 let todoLists = require("./lib/seed-data");
-const Todo = require("./lib/todo");
 
 
 app.set("view engine", "pug");
@@ -29,7 +29,6 @@ app.use(session({
   saveUninitialized: true,
   secret: "This really isn't secure at all"
 }));
-
 app.use(flash());
 app.use((req, res, next) => {
   res.locals.flash = req.session.flash;
@@ -37,9 +36,6 @@ app.use((req, res, next) => {
   next();
 });
 
-function getListById(lists, id) {
-  return lists.find(list => list.getId() === id);
-}
 
 app.get("/", (_req, res) => {
   res.redirect("/lists");
@@ -53,9 +49,14 @@ app.get("/lists/new", (_req, res) => {
   res.render("new-list");
 });
 
+
+function getListFromId(lists, id) {
+  return lists.find(list => list.getId() === id);
+}
+
 app.get("/lists/:todoListId", (req, res, next) => {
   let id = Number(req.params.todoListId);
-  let list = getListById(todoLists, id);
+  let list = getListFromId(todoLists, id);
   if (list) {
     res.render("list", {
       todoList: list,
@@ -65,6 +66,63 @@ app.get("/lists/:todoListId", (req, res, next) => {
       next(new Error("Todo list not found."));
   }
 });
+
+
+app.post("/lists/:todoListId/complete_all", (req, res, next) => {
+  let id = Number(req.params.todoListId);
+  let list = getListFromId(todoLists, id);
+  if (!list) {
+    next(new Error("Todo list not found."));
+  } else {
+    list.markAllDone();
+    res.redirect(`/lists/${id}`);
+  }
+});
+
+
+app.post("/lists/:todoListId/todos/:todoId/toggle", (req, res, next) => {
+  let listId = Number(req.params.todoListId);
+  let todoId = Number(req.params.todoId);
+  let list = getListFromId(todoLists, listId);
+
+  if (!list) {
+    next(new Error("Todo list not found."));
+  } else {
+    let todo = list.findById(todoId);
+    if (!todo) {
+      next(new Error("Todo item not found."));
+    } else {
+      todo.toggle();
+      if (req.body.done) {
+        req.flash("success", `"${todo.getTitle()}" marked complete.`);
+      } else {
+        req.flash("success", `"${todo.getTitle()}" unchecked.`);
+      }
+      res.redirect(`/lists/${listId}`);
+    }
+  }
+});
+
+
+app.post("/lists/:todoListId/todos/:todoId/destroy", (req, res, next) => {
+  let listId = Number(req.params.todoListId);
+  let todoId = Number(req.params.todoId);
+  let list = getListFromId(todoLists, listId);
+
+  if (!list) {
+    next(new Error("Todo list not found."));
+  } else {
+    let todo = list.findById(todoId);
+    if (!todo) {
+      next(new Error("Todo item not found."));
+    } else {
+      list.removeAt(list.findIndexOf(todo));
+      req.flash("success", `"${todo.getTitle()}" removed from list.`);
+      res.redirect(`/lists/${listId}`);
+    }
+  }
+});
+
 
 app.post("/lists",
   [
@@ -95,11 +153,13 @@ app.post("/lists",
   }
 );
 
+
 app.use((err, _req, res, _next) => {
   console.log(err);
   res.status(404)
      .send(err.message);
 });
+
 
 // Listener
 app.listen(PORT, HOST, () => {

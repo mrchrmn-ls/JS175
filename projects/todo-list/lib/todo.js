@@ -36,6 +36,10 @@ class Todo {
     return this.id;
   }
 
+  toggle() {
+    this.done = !this.done;
+  }
+
 }
 
 Todo.DONE_MARKER = "V";

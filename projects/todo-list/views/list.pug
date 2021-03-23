@@ -10,10 +10,10 @@ block main
             form.complete_all(action=`/lists/${todoList.getId()}/complete_all`
                               method="post")
               button.check(type="submit") Mark all complete
-          li 
-            form(action=`/lists/${todoList.getId()}/edit`
-                 method="get")
-              button.edit(type="submit") Edit list
+        li 
+          form(action=`/lists/${todoList.getId()}/edit`
+                method="get")
+            button.edit(type="submit") Edit list
     ul 
       each todo in todos 
         li(class=todo.isDone() ? "done" : "")
