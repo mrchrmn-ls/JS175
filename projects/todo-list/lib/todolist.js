@@ -22,6 +22,10 @@ class TodoList {
     this.title = title;
   }
 
+  getTodos() {
+    return this.todos.slice();
+  }
+
   add(todo) {
     if ((todo instanceof Todo) === false) {
       throw new TypeError("can only add Todo objects");
@@ -113,7 +117,7 @@ class TodoList {
   }
 
   allTodos() {
-    return this.todos.filter(_ = true);
+    return this.filter(_ => true);
   }
 
   markDone(title) {

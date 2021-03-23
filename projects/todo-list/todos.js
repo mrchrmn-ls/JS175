@@ -6,6 +6,7 @@ const session = require("express-session");
 const { body, validationResult } = require("express-validator");
 
 const TodoList = require("./lib/todolist");
+const { sortByTitleAndStatus } = require("./lib/sort");
 
 const app = express();
 const HOST = "localhost";
@@ -36,35 +37,33 @@ app.use((req, res, next) => {
   next();
 });
 
-
-// return copy of lists array sorted by list titles
-function sortTodoLists(lists) {
-  return lists.slice()
-              .sort((listA, listB) => {
-                let titleA = listA.getTitle().toLowerCase();
-                let titleB = listB.getTitle().toLowerCase();
-
-                if (titleA > titleB) return 1;
-                else if (titleA < titleB) return -1;
-                else return 0;
-              })
-              .sort((listA, listB) => {
-                if (listA.isDone() && !listB.isDone()) return 1;
-                else if (!listA.isDone() && listB.isDone()) return -1;
-                else return 0;
-              });
+function getListById(lists, id) {
+  return lists.find(list => list.getId() === id);
 }
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.redirect("/lists");
 });
 
-app.get("/lists", (req, res) => {
-  res.render("lists", { todoLists: sortTodoLists(todoLists) });
+app.get("/lists", (_req, res) => {
+  res.render("lists", { todoLists: sortByTitleAndStatus(todoLists) });
 });
 
-app.get("/lists/new", (req, res) => {
+app.get("/lists/new", (_req, res) => {
   res.render("new-list");
+});
+
+app.get("/lists/:todoListId", (req, res, next) => {
+  let id = Number(req.params.todoListId);
+  let list = getListById(todoLists, id);
+  if (list) {
+    res.render("list", {
+      todoList: list,
+      todos: sortByTitleAndStatus(list.getTodos())
+    });
+  } else {
+      next(new Error("Todo list not found."));
+  }
 });
 
 app.post("/lists",
@@ -95,6 +94,12 @@ app.post("/lists",
     }
   }
 );
+
+app.use((err, req, res, _next) => {
+  console.log(err);
+  res.status(404)
+     .send(err.message);
+});
 
 // Listener
 app.listen(PORT, HOST, () => {

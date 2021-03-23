@@ -1,8 +1,8 @@
 # ignore node_modules
 package-lock.json
-/*/node_modules/*
+/*/node_modules
 /*/package-lock.json
-/projects/*/node_modules/*
+/projects/*/node_modules
 /projects/*/package-lock.json
 /projects/*/session-store.db
 /projects/todos-final
