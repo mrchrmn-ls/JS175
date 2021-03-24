@@ -7,6 +7,10 @@ class Todo {
     this.done = false;
   }
 
+  static makeTodo(rawItem) {
+    return Object.assign(new Todo(), rawItem);
+  }
+
   toString() {
     let marker = this.isDone() ? Todo.DONE_MARKER : Todo.NOT_DONE_MARKER;
     return `[${marker}] - ${this.title}`;
@@ -39,7 +43,6 @@ class Todo {
   toggle() {
     this.done = !this.done;
   }
-
 }
 
 Todo.DONE_MARKER = "V";

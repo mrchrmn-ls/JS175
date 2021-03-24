@@ -10,6 +10,16 @@ class TodoList {
     this.todos = [];
   }
 
+  static makeTodoList(rawTodoList) {
+    let todoList = Object.assign(new TodoList(), {
+      id: rawTodoList.id,
+      title: rawTodoList.title
+    });
+
+    rawTodoList.todos.forEach(rawItem => todoList.add(Todo.makeTodo(rawItem)));
+    return todoList;
+  }
+
   getTitle() {
     return this.title;
   }
