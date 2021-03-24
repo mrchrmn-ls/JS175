@@ -27,7 +27,7 @@ block main
                       method="post")
             button Delete
 
-    form(action=`/lists/${todoList.getId()/todos}` method="post")
+    form(action=`/lists/${todoList.getId()}/todos` method="post")
       dl 
         dt 
           label(for="todoTitle") Enter a new thing to do: 
